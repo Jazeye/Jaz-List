@@ -23,7 +23,7 @@ A tool for generating and managing password lists, including protocol-based, ext
 Run the script:
 
 ```bash
-   cd src
-  ./pass-gen.sh
+  cd src
+  bash pass-gen.sh
 ```
 Follow the prompts to choose an option.
