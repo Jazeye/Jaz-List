@@ -39,11 +39,13 @@ stop_loading_animation() {
 landing_page() {
   local message="Welcome to the Password List Generator and Steganography Cracker"
   local art="
-    ____                                  
-   |  _ \ __ _ ___ ___    __ _  ___ _ __  
-   | |_) / _` / __/ __|  / _` |/ _ \ '_ \ 
-   |  __/ (_| \__ \__ \ | (_| |  __/ | | |
-   |_|   \__,_|___/___/  \__, |\___|_| |_|
+ ____                                  
+|  _ \ __ _ ___ ___    __ _  ___ _ __  
+| |_) / _` / __/ __|  / _` |/ _ \ '_ \ 
+|  __/ (_| \__ \__ \ | (_| |  __/ | | |
+|_|   \__,_|___/___/  \__, |\___|_| |_|
+                      |___/            
+
   "
   clear
   echo "$art"
