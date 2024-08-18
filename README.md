@@ -7,7 +7,7 @@ A tool for generating and managing password lists, including protocol-based, ext
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/password-list-generator.git
+   https://github.com/Jazeye/Pass-gen.git
    cd pass-gen
 
  2. Install required dependencies:
