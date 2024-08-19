@@ -183,21 +183,16 @@ save_to_file() {
   fi
 }
 
-# Main function
-main() {
-  landing_page
-  
-  echo "Password List Generator and Steganography Cracker"
-  echo "-----------------------------------------------"
-  echo "Choose an option:"
-  echo "1. Create a protocol-based wordlist"
-  echo "2. Create an extension-based wordlist"
-  echo "3. Create a custom wordlist"
-  echo "4. Generate a random wordlist"
-  echo "5. Crack a steganography image"
-  read -p "Enter your choice: " choice
+# Function to handle the password list generation
+handle_password_list_generation() {
+  local option=$1
+  local length=$2
+  local charset=$3
+  local protocol=$4
+  local extension=$5
+  local custom_filter=$6
 
-  case $choice in
+  case $option in
     1)
       echo "Choose a protocol:"
       for i in "${!PROTOCOLS[@]}"; do
@@ -232,7 +227,11 @@ main() {
       read -p "Enter the length: " length
       echo "Enter the character set (e.g. 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()'): "
       read -p "Enter the character set: " charset
+      echo "Generating random wordlist..."
+      loading_animation &
+      animation_pid=$!
       random_list=$(generate_custom_wordlist "$length" "$charset")
+      stop_loading_animation
       save_to_file "random_wordlist.txt" "$random_list"
       ;;
     5)
@@ -255,6 +254,23 @@ main() {
       echo "Invalid choice."
       ;;
   esac
+}
+
+# Main function
+main() {
+  landing_page
+  
+  echo "Password List Generator and Steganography Cracker"
+  echo "-----------------------------------------------"
+  echo "Choose an option:"
+  echo "1. Create a protocol-based wordlist"
+  echo "2. Create an extension-based wordlist"
+  echo "3. Create a custom wordlist"
+  echo "4. Generate a random wordlist"
+  echo "5. Crack a steganography image"
+  read -p "Enter your choice: " choice
+
+  handle_password_list_generation "$choice"
 }
 
 # Run the main function
