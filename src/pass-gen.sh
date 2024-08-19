@@ -38,7 +38,7 @@ stop_loading_animation() {
 # Function to display landing page animation
 landing_page() {
   local message="Welcome to the Password List Generator and Steganography Cracker"
-  local developer="Developed by Jaseel | Version $VERSION"
+  local developer="Developed by Jaseel | Version 0.1 $VERSION"
   local art="
  ____                                  
 |  _ \ __ _ ___ ___    __ _  ___ _ __  
