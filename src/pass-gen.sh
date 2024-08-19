@@ -201,7 +201,7 @@ main() {
       protocol=${PROTOCOLS[$((protocol_choice-1))]}
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "$protocol" "" "$password_list")
-      save_to_file "protocol_${protocol}_wordlist.txt" "$filtered_list"
+      save_to_file "${protocol}_wordlist.txt" "$filtered_list"
       ;;
     2)
       echo "Choose an extension:"
@@ -212,14 +212,14 @@ main() {
       extension=${EXTENSIONS[$((extension_choice-1))]}
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "" "$extension" "$password_list")
-      save_to_file "extension_${extension}_wordlist.txt" "$filtered_list"
+      save_to_file "${extension}_wordlist.txt" "$filtered_list"
       ;;
     3)
       echo "Enter a custom filter (e.g. 'ssh' or '.pdf'): "
       read -p "Enter your filter: " custom_filter
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "" "" "$password_list" | grep -Ei "$custom_filter")
-      save_to_file "custom_${custom_filter}_wordlist.txt" "$filtered_list"
+      save_to_file "${custom_filter}_wordlist.txt" "$filtered_list"
       ;;
     4)
       echo "Enter the length of the wordlist: "
