@@ -309,6 +309,10 @@ handle_password_list_generation() {
         echo "No password found."
       fi
       ;;
+    6)
+      echo "Exiting the tool. Goodbye!"
+      exit 0
+      ;;
     *)
       echo "Invalid choice."
       ;;
@@ -327,6 +331,7 @@ main() {
   echo "3. Create a custom wordlist"
   echo "4. Generate a random wordlist"
   echo "5. Crack a steganography image"
+  echo "6. Quit"
   read -p "Enter your choice: " choice
 
   handle_password_list_generation "$choice"
