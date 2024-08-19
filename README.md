@@ -17,7 +17,7 @@ A tool for generating and managing password lists, including protocol-based, ext
 3. (Optional) Compile the script into an executable:
 
 ```bash
-  shc -f src/pass-gen.sh -o pass-gen
+  shc -f src/pass-gen.sh -o Jaz-List
 ```
 ## Usage
 Run the script:
