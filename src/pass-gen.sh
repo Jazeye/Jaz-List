@@ -40,12 +40,12 @@ landing_page() {
   local message="Welcome to the Password List Generator and Steganography Cracker"
   local developer="Developed by Jaseel | Version 0.1"
   local art="
-     _                _     _     _   
-    | | __ _ ____    | |   (_)___| |_ 
- _  | |/ _` |_  /____| |   | / __| __|
-| |_| | (_| |/ /_____| |___| \__ \ |_ 
- \___/ \__,_/___|    |_____|_|___/\__|
-                                                                                             
+     _   _     _____  _     ___ ____ _____ 
+    | | / \   |__  / | |   |_ _/ ___|_   _|
+ _  | |/ _ \    / /  | |    | |\___ \ | |  
+| |_| / ___ \  / /_  | |___ | | ___) || |  
+ \___/_/   \_\/____| |_____|___|____/ |_|  
+                                                      
   "
   clear
   echo "$art"
