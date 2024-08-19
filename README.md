@@ -7,7 +7,7 @@ A tool for generating and managing password lists, including protocol-based, ext
 
 1. Clone the repository:
    ```bash
-   https://github.com/Jazeye/PentaPass.git
+   git clone https://github.com/Jazeye/Jaz-List.git
    cd Pass-gen
 
  2. Install required dependencies:
