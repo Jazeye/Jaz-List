@@ -151,17 +151,23 @@ generate_random_password() {
   echo "$password"
 }
 
-# Function to crack steganography images
+# Function to crack steganography images with an optional verbose mode
 crack_steganography_image() {
   local image_file=$1
   local password_list=$2
+  local verbose=$3
   local cracked_password=""
+
   for password in $password_list; do
-    if steghide extract -sf $image_file -p $password; then
+    if [ "$verbose" == "true" ]; then
+      echo "Trying password: $password"
+    fi
+    if steghide extract -sf "$image_file" -p "$password" >/dev/null 2>&1; then
       cracked_password=$password
       break
     fi
   done
+
   echo "$cracked_password"
 }
 
@@ -233,7 +239,12 @@ main() {
       echo "Enter the path to the image file: "
       read -p "Enter image file path: " image_file
       password_list=$(download_and_combine_password_lists)
-      cracked_password=$(crack_steganography_image "$image_file" "$password_list")
+      read -p "Enable verbose mode? (y/n): " verbose_choice
+      if [ "$verbose_choice" == "y" ]; then
+        cracked_password=$(crack_steganography_image "$image_file" "$password_list" "true")
+      else
+        cracked_password=$(crack_steganography_image "$image_file" "$password_list" "false")
+      fi
       if [ -n "$cracked_password" ]; then
         echo "Cracked password: $cracked_password"
       else
