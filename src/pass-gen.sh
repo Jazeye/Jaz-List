@@ -38,7 +38,7 @@ stop_loading_animation() {
 # Function to display landing page animation
 landing_page() {
   local message="Welcome to the Password List Generator and Steganography Cracker"
-  local developer="Developed by Jaseel | Version 0.1 $VERSION"
+  local developer="Developed by Jaseel | Version 0.1"
   local art="
  ____                                  
 |  _ \ __ _ ___ ___    __ _  ___ _ __  
@@ -111,7 +111,7 @@ filter_password_list() {
 
   # Ensure at least 10,000 passwords
   if [ $(echo "$filtered_list" | wc -l) -lt 100000 ]; then
-    echo "Filtered list contains fewer than 100000 passwords. Extending list..."
+    echo "Filtered list contains fewer than 10,000 passwords. Extending list..."
     filtered_list=$(echo "$password_list" | shuf | head -n 100000)
   fi
 
@@ -226,12 +226,23 @@ handle_password_list_generation() {
       read -p "Enter your choice: " protocol_choice
       protocol=${PROTOCOLS[$((protocol_choice-1))]}
       
+      read -p "Enter the length of the wordlist (number of passwords, or 0 to skip): " wordlist_length
+      if [ "$wordlist_length" -eq 0 ]; then
+        echo "You chose to skip specifying the length."
+        wordlist_length=0
+      fi
+      
       echo "Downloading and filtering password lists..."
       loading_animation &
       animation_pid=$!
       
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "$protocol" "" "$password_list")
+      
+      # Limit to the specified length, if provided
+      if [ "$wordlist_length" -ne 0 ]; then
+        filtered_list=$(echo "$filtered_list" | head -n "$wordlist_length")
+      fi
       
       stop_loading_animation
       save_to_file "${protocol}_wordlist.txt" "$filtered_list"
@@ -244,12 +255,23 @@ handle_password_list_generation() {
       read -p "Enter your choice: " extension_choice
       extension=${EXTENSIONS[$((extension_choice-1))]}
       
+      read -p "Enter the length of the wordlist (number of passwords, or 0 to skip): " wordlist_length
+      if [ "$wordlist_length" -eq 0 ]; then
+        echo "You chose to skip specifying the length."
+        wordlist_length=0
+      fi
+      
       echo "Downloading and filtering password lists..."
       loading_animation &
       animation_pid=$!
       
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "" "$extension" "$password_list")
+      
+      # Limit to the specified length, if provided
+      if [ "$wordlist_length" -ne 0 ]; then
+        filtered_list=$(echo "$filtered_list" | head -n "$wordlist_length")
+      fi
       
       stop_loading_animation
       save_to_file "${extension}_wordlist.txt" "$filtered_list"
