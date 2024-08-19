@@ -200,8 +200,15 @@ handle_password_list_generation() {
       done
       read -p "Enter your choice: " protocol_choice
       protocol=${PROTOCOLS[$((protocol_choice-1))]}
+      
+      echo "Downloading and filtering password lists..."
+      loading_animation &
+      animation_pid=$!
+      
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "$protocol" "" "$password_list")
+      
+      stop_loading_animation
       save_to_file "${protocol}_wordlist.txt" "$filtered_list"
       ;;
     2)
@@ -211,15 +218,29 @@ handle_password_list_generation() {
       done
       read -p "Enter your choice: " extension_choice
       extension=${EXTENSIONS[$((extension_choice-1))]}
+      
+      echo "Downloading and filtering password lists..."
+      loading_animation &
+      animation_pid=$!
+      
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "" "$extension" "$password_list")
+      
+      stop_loading_animation
       save_to_file "${extension}_wordlist.txt" "$filtered_list"
       ;;
     3)
       echo "Enter a custom filter (e.g. 'ssh' or '.pdf'): "
       read -p "Enter your filter: " custom_filter
+      
+      echo "Downloading and filtering password lists..."
+      loading_animation &
+      animation_pid=$!
+      
       password_list=$(download_and_combine_password_lists)
       filtered_list=$(filter_password_list "" "" "$password_list" | grep -Ei "$custom_filter")
+      
+      stop_loading_animation
       save_to_file "${custom_filter}_wordlist.txt" "$filtered_list"
       ;;
     4)
@@ -227,23 +248,33 @@ handle_password_list_generation() {
       read -p "Enter the length: " length
       echo "Enter the character set (e.g. 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()'): "
       read -p "Enter the character set: " charset
+      
       echo "Generating random wordlist..."
       loading_animation &
       animation_pid=$!
+      
       random_list=$(generate_custom_wordlist "$length" "$charset")
+      
       stop_loading_animation
       save_to_file "random_wordlist.txt" "$random_list"
       ;;
     5)
       echo "Enter the path to the image file: "
       read -p "Enter image file path: " image_file
-      password_list=$(download_and_combine_password_lists)
       read -p "Enable verbose mode? (y/n): " verbose_choice
+      verbose="false"
       if [ "$verbose_choice" == "y" ]; then
-        cracked_password=$(crack_steganography_image "$image_file" "$password_list" "true")
-      else
-        cracked_password=$(crack_steganography_image "$image_file" "$password_list" "false")
+        verbose="true"
       fi
+      
+      echo "Downloading password lists..."
+      loading_animation &
+      animation_pid=$!
+      
+      password_list=$(download_and_combine_password_lists)
+      
+      stop_loading_animation
+      cracked_password=$(crack_steganography_image "$image_file" "$password_list" "$verbose")
       if [ -n "$cracked_password" ]; then
         echo "Cracked password: $cracked_password"
       else
