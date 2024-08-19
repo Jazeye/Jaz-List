@@ -123,15 +123,16 @@ filter_password_list() {
   echo "$filtered_list"
 }
 
-# Function to generate a custom wordlist with at least 100000 unique passwords
+# Function to generate a custom wordlist with user-defined settings
 generate_custom_wordlist() {
   local length=$1
   local charset=$2
-  local num_passwords=100000
+  local num_passwords=$3
+  local word_or_name=$4
   local password_list=()
   
   while [ ${#password_list[@]} -lt $num_passwords ]; do
-    password=$(generate_random_password "$length" "$charset")
+    password=$(generate_random_password "$length" "$charset" "$word_or_name")
     password_list+=("$password")
   done
   
@@ -140,15 +141,39 @@ generate_custom_wordlist() {
   echo "$unique_passwords"
 }
 
-# Helper function to generate a random password
+# Helper function to generate a random password with optional included words
 generate_random_password() {
   local length=$1
   local charset=$2
+  local word_or_name=$3
   local password=""
+  
+  # Include specific word or name if provided
+  if [ -n "$word_or_name" ]; then
+    password+="$word_or_name"
+    length=$((length - ${#word_or_name}))
+  fi
+  
+  # Generate random part of the password
   for ((i=0; i<$length; i++)); do
     password+=$(echo -n "${charset:$(( RANDOM % ${#charset} )):1}")
   done
   echo "$password"
+}
+
+# Function to generate a random wordlist with user-defined settings
+generate_random_wordlist() {
+  local length=$1
+  local num_passwords=$2
+
+  echo "Generating random wordlist..."
+  loading_animation &
+  animation_pid=$!
+  
+  random_list=$(generate_custom_wordlist "$length" "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()" "$num_passwords" "")
+  
+  stop_loading_animation
+  echo "$random_list"
 }
 
 # Function to crack steganography images with an optional verbose mode
@@ -230,30 +255,33 @@ handle_password_list_generation() {
       save_to_file "${extension}_wordlist.txt" "$filtered_list"
       ;;
     3)
-      echo "Enter a custom filter (e.g. 'ssh' or '.pdf'): "
-      read -p "Enter your filter: " custom_filter
+      echo "Enter the length of each password: "
+      read -p "Enter the length: " length
+      echo "Enter the included word or name for creating custom wordlist (leave blank for none): "
+      read -p "Enter the word or name: " word_or_name
+      echo "Enter the number of passwords you want to generate: "
+      read -p "Enter the number: " num_passwords
       
-      echo "Downloading and filtering password lists..."
+      echo "Generating custom wordlist..."
       loading_animation &
       animation_pid=$!
       
-      password_list=$(download_and_combine_password_lists)
-      filtered_list=$(filter_password_list "" "" "$password_list" | grep -Ei "$custom_filter")
+      custom_list=$(generate_custom_wordlist "$length" "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()" "$num_passwords" "$word_or_name")
       
       stop_loading_animation
-      save_to_file "${custom_filter}_wordlist.txt" "$filtered_list"
+      save_to_file "custom_wordlist.txt" "$custom_list"
       ;;
     4)
-      echo "Enter the length of the wordlist: "
+      echo "Enter the length of each password: "
       read -p "Enter the length: " length
-      echo "Enter the character set (e.g. 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()'): "
-      read -p "Enter the character set: " charset
+      echo "Enter the number of passwords you want to generate: "
+      read -p "Enter the number: " num_passwords
       
       echo "Generating random wordlist..."
       loading_animation &
       animation_pid=$!
       
-      random_list=$(generate_custom_wordlist "$length" "$charset")
+      random_list=$(generate_random_wordlist "$length" "$num_passwords")
       
       stop_loading_animation
       save_to_file "random_wordlist.txt" "$random_list"
