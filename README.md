@@ -8,7 +8,7 @@ A tool for generating and managing password lists, including protocol-based, ext
 1. Clone the repository:
    ```bash
    git clone https://github.com/Jazeye/Jaz-List.git
-   cd Pass-gen
+   cd Jaz-List/src
 
  2. Install required dependencies:
 ```bash
