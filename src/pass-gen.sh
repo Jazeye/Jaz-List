@@ -123,7 +123,7 @@ filter_password_list() {
   echo "$filtered_list"
 }
 
-# Function to generate a custom wordlist with at least 10,000 unique passwords
+# Function to generate a custom wordlist with at least 100000 unique passwords
 generate_custom_wordlist() {
   local length=$1
   local charset=$2
