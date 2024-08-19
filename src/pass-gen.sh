@@ -110,9 +110,9 @@ filter_password_list() {
   fi
 
   # Ensure at least 10,000 passwords
-  if [ $(echo "$filtered_list" | wc -l) -lt 100000 ]; then
-    echo "Filtered list contains fewer than 100000 passwords. Extending list..."
-    filtered_list=$(echo "$password_list" | shuf | head -n 100000)
+  if [ $(echo "$filtered_list" | wc -l) -lt 10000 ]; then
+    echo "Filtered list contains fewer than 10,000 passwords. Extending list..."
+    filtered_list=$(echo "$password_list" | shuf | head -n 10000)
   fi
 
   # Check if filtering was successful
