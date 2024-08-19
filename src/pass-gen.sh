@@ -10,8 +10,6 @@ ADDITIONAL_URLS=(
   "https://raw.githubusercontent.com/fiqri/wordlist/master/rockyou.txt"
   "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Leaked-Databases/english.txt"
   "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Leaked-Databases/facebook.txt"
-  "https://raw.githubusercontent.com/rockyou/rockyou/master/rockyou.txt"
-  "https://raw.githubusercontent.com/rockyou/rockyou/master/rockyou_updated.txt"
 )
 
 # Define the protocol and extension-based wordlist options
@@ -111,10 +109,10 @@ filter_password_list() {
     filtered_list=$password_list
   fi
 
-  # Ensure at least 1 million passwords
-  if [ $(echo "$filtered_list" | wc -l) -lt 1000000 ]; then
-    echo "Filtered list contains fewer than 1 million passwords. Extending list..."
-    filtered_list=$(echo "$password_list" | shuf | head -n 1000000)
+  # Ensure at least 10,000 passwords
+  if [ $(echo "$filtered_list" | wc -l) -lt 100000 ]; then
+    echo "Filtered list contains fewer than 100000 passwords. Extending list..."
+    filtered_list=$(echo "$password_list" | shuf | head -n 100000)
   fi
 
   # Check if filtering was successful
@@ -132,11 +130,6 @@ generate_custom_wordlist() {
   local num_passwords=$3
   local word_or_name=$4
   local password_list=()
-  
-  # Ensure at least 1 million passwords
-  if [ "$num_passwords" -lt 1000000 ]; then
-    num_passwords=1000000
-  fi
   
   while [ ${#password_list[@]} -lt $num_passwords ]; do
     password=$(generate_random_password "$length" "$charset" "$word_or_name")
@@ -172,11 +165,6 @@ generate_random_password() {
 generate_random_wordlist() {
   local length=$1
   local num_passwords=$2
-
-  # Ensure at least 1 million passwords
-  if [ "$num_passwords" -lt 1000000 ]; then
-    num_passwords=1000000
-  fi
 
   echo "Generating random wordlist..."
   loading_animation &
@@ -223,6 +211,11 @@ save_to_file() {
 # Function to handle the password list generation
 handle_password_list_generation() {
   local option=$1
+  local length=$2
+  local charset=$3
+  local protocol=$4
+  local extension=$5
+  local custom_filter=$6
 
   case $option in
     1)
@@ -233,6 +226,28 @@ handle_password_list_generation() {
       read -p "Enter your choice: " protocol_choice
       protocol=${PROTOCOLS[$((protocol_choice-1))]}
       
+      read -p "Enter the length of the wordlist (number of passwords, or 0 to skip): " wordlist_length
+      if [ "$wordlist_length" -eq 0 ]; then
+        echo "You chose to skip specifying the length."
+        wordlist_length=0
+      fi
+      
+      echo "Downloading and filtering password lists..."
+      loading_animation &
+      animation_pid=$!
+      
+      password_list=$(download_and_combine_password_lists)
+      filtered_list=$(filter_password_list "$protocol" "" "$password_list")
+      
+      # Limit to the specified length, if provided
+      if [ "$wordlist_length" -ne 0 ]; then
+        filtered_list=$(echo "$filtered_list" | head -n "$wordlist_length")
+      fi
+      
+      stop_loading_animation
+      save_to_file "${protocol}_wordlist.txt" "$filtered_list"
+      ;;
+    2)
       echo "Choose an extension:"
       for i in "${!EXTENSIONS[@]}"; do
         echo "$((i+1)). ${EXTENSIONS[$i]}"
@@ -242,69 +257,107 @@ handle_password_list_generation() {
       
       read -p "Enter the length of the wordlist (number of passwords, or 0 to skip): " wordlist_length
       if [ "$wordlist_length" -eq 0 ]; then
-        echo "You chose not to set a length for the wordlist."
-        wordlist_length=""
+        echo "You chose to skip specifying the length."
+        wordlist_length=0
       fi
       
+      echo "Downloading and filtering password lists..."
+      loading_animation &
+      animation_pid=$!
+      
       password_list=$(download_and_combine_password_lists)
-      filtered_list=$(filter_password_list "$protocol" "$extension" "$password_list")
-
-      save_to_file "filtered_list.txt" "$filtered_list"
-      ;;
-    2)
-      echo "Generating random password list..."
-      read -p "Enter the length of each password: " password_length
-      read -p "Enter the number of passwords to generate: " num_passwords
-
-      generate_random_wordlist "$password_length" "$num_passwords" > "random_wordlist.txt"
-      echo "Random wordlist saved to random_wordlist.txt"
+      filtered_list=$(filter_password_list "" "$extension" "$password_list")
+      
+      # Limit to the specified length, if provided
+      if [ "$wordlist_length" -ne 0 ]; then
+        filtered_list=$(echo "$filtered_list" | head -n "$wordlist_length")
+      fi
+      
+      stop_loading_animation
+      save_to_file "${extension}_wordlist.txt" "$filtered_list"
       ;;
     3)
-      echo "Generating custom password list..."
-      read -p "Enter the length of each password: " password_length
-      read -p "Enter the number of passwords to generate: " num_passwords
-      read -p "Enter a character set (leave empty for default): " charset
-      read -p "Enter a specific word or name to include (leave empty for none): " word_or_name
-
-      generate_custom_wordlist "$password_length" "$charset" "$num_passwords" "$word_or_name" > "custom_wordlist.txt"
-      echo "Custom wordlist saved to custom_wordlist.txt"
+      echo "Enter the length of each password: "
+      read -p "Enter the length: " length
+      echo "Enter the included word or name for creating custom wordlist (leave blank for none): "
+      read -p "Enter the word or name: " word_or_name
+      echo "Enter the number of passwords you want to generate: "
+      read -p "Enter the number: " num_passwords
+      
+      echo "Generating custom wordlist..."
+      loading_animation &
+      animation_pid=$!
+      
+      custom_list=$(generate_custom_wordlist "$length" "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()" "$num_passwords" "$word_or_name")
+      
+      stop_loading_animation
+      save_to_file "custom_wordlist.txt" "$custom_list"
+      ;;
+    4)
+      echo "Enter the length of each password: "
+      read -p "Enter the length: " length
+      echo "Enter the number of passwords you want to generate: "
+      read -p "Enter the number: " num_passwords
+      
+      echo "Generating random wordlist..."
+      loading_animation &
+      animation_pid=$!
+      
+      random_list=$(generate_random_wordlist "$length" "$num_passwords")
+      
+      stop_loading_animation
+      save_to_file "random_wordlist.txt" "$random_list"
+      ;;
+    5)
+      echo "Enter the path to the image file: "
+      read -p "Enter image file path: " image_file
+      read -p "Enable verbose mode? (y/n): " verbose_choice
+      verbose="false"
+      if [ "$verbose_choice" == "y" ]; then
+        verbose="true"
+      fi
+      
+      echo "Downloading password lists..."
+      loading_animation &
+      animation_pid=$!
+      
+      password_list=$(download_and_combine_password_lists)
+      
+      stop_loading_animation
+      cracked_password=$(crack_steganography_image "$image_file" "$password_list" "$verbose")
+      if [ -n "$cracked_password" ]; then
+        echo "Cracked password: $cracked_password"
+      else
+        echo "No password found."
+      fi
+      ;;
+    6)
+      echo "Exiting the tool. Goodbye!"
+      exit 0
       ;;
     *)
-      echo "Invalid option selected."
+      echo "Invalid choice."
       ;;
   esac
 }
 
-# Main program
-landing_page
-
-# Display options
-echo "Choose an option:"
-echo "1. Generate a filtered password list"
-echo "2. Generate a random password list"
-echo "3. Generate a custom password list"
-
-# Read user choice
-read -p "Enter your choice: " user_choice
-
-# Handle password list generation based on user choice
-handle_password_list_generation "$user_choice"
-
-# Optionally, handle steganography cracking
-read -p "Do you want to crack a steganography image? (y/n): " stego_choice
-if [ "$stego_choice" == "y" ]; then
-  read -p "Enter the image file path: " image_file
-  read -p "Enter the path to the password list: " password_list_file
-  read -p "Verbose output? (y/n): " verbose_choice
-  verbose=false
-  [ "$verbose_choice" == "y" ] && verbose=true
+# Main function
+main() {
+  landing_page
   
-  password_list=$(cat "$password_list_file")
-  cracked_password=$(crack_steganography_image "$image_file" "$password_list" "$verbose")
-  
-  if [ -n "$cracked_password" ]; then
-    echo "Cracked password: $cracked_password"
-  else
-    echo "Failed to crack the image."
-  fi
-fi
+  echo "Password List Generator and Steganography Cracker"
+  echo "-----------------------------------------------"
+  echo "Choose an option:"
+  echo "1. Create a protocol-based wordlist"
+  echo "2. Create an extension-based wordlist"
+  echo "3. Create a custom wordlist"
+  echo "4. Generate a random wordlist"
+  echo "5. Crack a steganography image"
+  echo "6. Quit"
+  read -p "Enter your choice: " choice
+
+  handle_password_list_generation "$choice"
+}
+
+# Run the main function
+main
